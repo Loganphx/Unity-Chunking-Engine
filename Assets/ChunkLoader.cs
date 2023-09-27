@@ -48,21 +48,24 @@ public class ChunkLoader : MonoBehaviour
       var position = new Vector2(chunk.transform.position.x, chunk.transform.position.z);
       scenes[chunk.x][chunk.y] = new ChunkData
       {
-        position = position,
+        position = new Vector3(chunk.transform.position.x, 0, chunk.transform.position.z),
         faces = new []
         {
-          position + new Vector2(chunk.size.x / 2, 0),
+          position - new Vector2(0, chunk.size.z / 2),
           position - new Vector2(chunk.size.x / 2, 0),
           position + new Vector2(0, chunk.size.z / 2),
-          position - new Vector2(0, chunk.size.z / 2),
+          position + new Vector2(chunk.size.x / 2, 0),
         },
         vertices = new []
         {
-          position + new Vector2(chunk.size.x / 2, 0),
-          position - new Vector2(chunk.size.x / 2, 0),
-          position + new Vector2(0, chunk.size.z / 2),
-          position - new Vector2(0, chunk.size.z / 2),
-
+          // Bottom Left
+          position - new Vector2(chunk.size.x / 2, chunk.size.z / 2),
+          // Top Left
+          position - new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
+          // Top Right
+          position + new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
+          // Bottom Right
+          position + new Vector2(chunk.size.x / 2, chunk.size.z / 2),
         },
         size = chunk.size,
         chunkSceneIndex = scene.buildIndex,
@@ -95,7 +98,7 @@ public class ChunkLoader : MonoBehaviour
     if (_currentChunk.x > 0) // (-1, 0)
     {
       chunk = scenes[_currentChunk.x - 1][_currentChunk.y];
-      if (chunk != null) HandleChunk(position, chunk, chunk.faces[0]);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[3]);
     }
 
     // (-1, 1)
@@ -108,38 +111,38 @@ public class ChunkLoader : MonoBehaviour
     if (_currentChunk.y > 0) // (0, -1)
     {
       chunk = scenes[_currentChunk.x][_currentChunk.y - 1];
-      if (chunk != null) HandleChunk(position, chunk, chunk.faces);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[2]);
     }
 
     if (_currentChunk.x > 0 && _currentChunk.y > 0) // (-1, -1)
     {
       chunk = scenes[_currentChunk.x - 1][_currentChunk.y - 1];
-      if (chunk != null) HandleChunk(position, chunk, chunk.position);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[3]);
     }
 
     // (1, -1)
     if (_currentChunk.x < scenes.Length - 1 && _currentChunk.y > 0)
     {
       chunk = scenes[_currentChunk.x + 1][_currentChunk.y - 1];
-      if (chunk != null) HandleChunk(position, chunk, chunk.position);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[1]);
     }
 
     if (_currentChunk.x < scenes.Length - 1) // (1, 0)
     {
       chunk = scenes[_currentChunk.x + 1][_currentChunk.y];
-      if (chunk != null) HandleChunk(position, chunk, chunk.posXEdge);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[1]);
     }
 
     if (_currentChunk.y < scenes[_currentChunk.x].Length - 1) // (0, 1)
     {
       chunk = scenes[_currentChunk.x][_currentChunk.y + 1];
-      if (chunk != null) HandleChunk(position, chunk, chunk.posYEdge);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[0]);
     }
 
     if (_currentChunk.x < scenes.Length - 1 && _currentChunk.y < scenes[_currentChunk.x].Length - 1) // (1, 1)
     {
       chunk = scenes[_currentChunk.x + 1][_currentChunk.y + 1];
-      if (chunk != null) HandleChunk(position, chunk, chunk.position);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[0]);
     }
 
     if (_currentChunk.x == closestX && _currentChunk.y == closestY) return;
@@ -231,6 +234,19 @@ public class ChunkLoader : MonoBehaviour
           if (!y.isLoaded) GUI.contentColor = Color.white;
           else GUI.contentColor = Color.green;
           Handles.Label(y.position, $"({y.x}, {y.y})");
+
+          foreach (var vert in y.faces)
+          {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(new Vector3(vert.x, 0, vert.y), new Vector3(0.1f, 0.1f,0.1f));
+          }
+          
+          
+          foreach (var vert in y.vertices)
+          {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(new Vector3(vert.x, 0, vert.y), 0.1f);
+          }
         }
       }
     }
