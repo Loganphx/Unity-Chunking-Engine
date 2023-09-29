@@ -3,11 +3,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [Serializable]
-public class ChunkData
+public struct ChunkData
 {
-  public Vector3 position;
+  public bool isValid;
+  
+  public Vector2 position;
   public Vector3 size;
 
+  [SerializeField] 
   public Vector2[] faces;
   public Vector2[] vertices; 
   public int chunkSceneIndex;
