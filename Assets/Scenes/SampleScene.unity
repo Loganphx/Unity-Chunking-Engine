@@ -230,90 +230,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e7f2680847fef44990ac864864107b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentChunk:
+  currentChunk:
+    isValid: 0
     position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  _chunksX0:
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  _chunksX1:
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
-    size: {x: 0, y: 0, z: 0}
-    faces: []
-    vertices: []
-    chunkSceneIndex: 0
-    x: 0
-    y: 0
-    isLoaded: 0
-  - position: {x: 0, y: 0}
     size: {x: 0, y: 0, z: 0}
     faces: []
     vertices: []
@@ -324,7 +243,7 @@ MonoBehaviour:
   closestDistance: 0
   closestX: 0
   closestY: 0
-  distance: 5
+  distance: 500
   chunkPos: {x: 0, y: 0}
   closestPos: {x: 0, y: 0}
 --- !u!1 &963194225

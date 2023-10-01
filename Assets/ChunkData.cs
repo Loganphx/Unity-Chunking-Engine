@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [Serializable]
-public struct ChunkData
+public class ChunkData
 {
   public bool isValid;
   

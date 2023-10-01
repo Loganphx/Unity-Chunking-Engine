@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 
 [Serializable]
@@ -9,18 +10,24 @@ public class ChunkLoader : MonoBehaviour
 {
   [SerializeField] private ChunkData currentChunk;
 
-  [SerializeField] private ChunkData[][] scenes;
+  [SerializeField] private ChunkData[][] scenes = new ChunkData[][]
+  {
+    new ChunkData[6],
+    new ChunkData[6],
+    new ChunkData[6],
+    new ChunkData[6],
+    new ChunkData[6],
+    new ChunkData[6],
+  };
 
   private void Awake()
   {
+    _transform = transform;
     scenes = new ChunkData[][]
     {
       new ChunkData[5],
       new ChunkData[5],
-      new ChunkData[5],
-      new ChunkData[5],
-      new ChunkData[5],
-    };
+     };
     
     Application.targetFrameRate = 60;
     var sceneCount = SceneManager.sceneCountInBuildSettings;
@@ -45,33 +52,37 @@ public class ChunkLoader : MonoBehaviour
 
       Debug.Log("Found chunk " + $"{chunk.x}, {chunk.y}");
       var position = new Vector2(chunk.transform.position.x, chunk.transform.position.z);
-      scenes[chunk.x][chunk.y] = new ChunkData
+      if (chunk.x < scenes.Length && chunk.y < scenes[chunk.x].Length)
       {
-        isValid = true,
-        position = position,
-        faces = new[]
+        scenes[chunk.x][chunk.y] = new ChunkData
         {
-          position - new Vector2(0, chunk.size.z / 2),
-          position - new Vector2(chunk.size.x / 2, 0),
-          position + new Vector2(0, chunk.size.z / 2),
-          position + new Vector2(chunk.size.x / 2, 0),
-        },
-        vertices = new[]
-        {
-          // Bottom Left
-          position - new Vector2(chunk.size.x / 2, chunk.size.z / 2),
-          // Top Left
-          position - new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
-          // Top Right
-          position + new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
-          // Bottom Right
-          position + new Vector2(chunk.size.x / 2, chunk.size.z / 2),
-        },
-        size = chunk.size,
-        chunkSceneIndex = scene.buildIndex,
-        x = chunk.x,
-        y = chunk.y,
-      };
+          isValid  = true,
+          position = position,
+          faces = new[]
+          {
+            position - new Vector2(0, chunk.size.z / 2),
+            position - new Vector2(chunk.size.x    / 2, 0),
+            position + new Vector2(0,                   chunk.size.z / 2),
+            position + new Vector2(chunk.size.x                      / 2, 0),
+          },
+          vertices = new[]
+          {
+            // Bottom Left
+            position - new Vector2(chunk.size.x / 2, chunk.size.z / 2),
+            // Top Left
+            position - new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
+            // Top Right
+            position + new Vector2(chunk.size.x / 2, -chunk.size.z / 2),
+            // Bottom Right
+            position + new Vector2(chunk.size.x / 2, chunk.size.z / 2),
+          },
+          size            = chunk.size,
+          chunkSceneIndex = scene.buildIndex,
+          x               = chunk.x,
+          y               = chunk.y,
+        };
+      }
+      
       //var boxCollider = new GameObject($"Chunk - {scene.name}").AddComponent<BoxCollider>();
       //boxCollider.center = chunk.transform.position + chunk.offset;
       //boxCollider.size = chunk.size;
@@ -121,51 +132,51 @@ public class ChunkLoader : MonoBehaviour
     if (currentChunk.x > 0) // (-1, 0)
     {
       chunk = scenes[(byte)(currentChunk.x - 1)][currentChunk.y];
-      if (chunk.isValid) HandleChunk(position, ref scenes[(byte)(currentChunk.x + 1)][(byte)(currentChunk.y + 1)], chunk.faces[1], true, false);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[1], true, false);
     }
 
     // (-1, 1)
     if (currentChunk.x > 0 && currentChunk.y < scenes[currentChunk.x].Length - 1)
     {
       chunk = scenes[(byte)(currentChunk.x - 1)][(byte)(currentChunk.y + 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[(byte)(currentChunk.x - 1)][(byte)(currentChunk.y + 1)], chunk.vertices[1], true, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[1], true, true);
     }
 
     if (currentChunk.y > 0) // (0, -1)
     {
       chunk = scenes[currentChunk.x][(byte)(currentChunk.y - 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[currentChunk.x][(byte)(currentChunk.y - 1)], chunk.faces[0], false, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[0], false, true);
     }
 
     if (currentChunk.x > 0 && currentChunk.y > 0) // (-1, -1)
     {
       chunk = scenes[(byte)(currentChunk.x - 1)][(byte)(currentChunk.y - 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[(byte)(currentChunk.x - 1)][(byte)(currentChunk.y - 1)], chunk.vertices[0], true, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[0], true, true);
     }
 
     // (1, -1)
     if (currentChunk.x < scenes.Length - 1 && currentChunk.y > 0)
     {
       chunk = scenes[(byte)(currentChunk.x + 1)][(byte)(currentChunk.y - 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[(byte)(currentChunk.x + 1)][(byte)(currentChunk.y - 1)], chunk.vertices[2], true, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[2], true, true);
     }
 
     if (currentChunk.x < scenes.Length - 1) // (1, 0)
     {
       chunk = scenes[(byte)(currentChunk.x + 1)][currentChunk.y];
-      if (chunk.isValid) HandleChunk(position, ref scenes[(byte)(currentChunk.x + 1)][currentChunk.y], chunk.faces[3], true, false);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[3], true, false);
     }
 
     if (currentChunk.y < scenes[currentChunk.x].Length - 1) // (0, 1)
     {
       chunk = scenes[currentChunk.x][(byte)(currentChunk.y + 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[currentChunk.x][(byte)(currentChunk.y + 1)], chunk.faces[02], false, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.faces[02], false, true);
     }
 
     if (currentChunk.x < scenes.Length - 1 && currentChunk.y < scenes[currentChunk.x].Length - 1) // (1, 1)
     {
       chunk = scenes[(byte)(currentChunk.x + 1)][(byte)(currentChunk.y + 1)];
-      if (chunk.isValid) HandleChunk(position, ref scenes[currentChunk.x][(byte)(currentChunk.y + 1)], chunk.vertices[3], true, true);
+      if (chunk != null) HandleChunk(position, chunk, chunk.vertices[3], true, true);
     }
 
     if (currentChunk.x == closestX && currentChunk.y == closestY)
@@ -174,13 +185,14 @@ public class ChunkLoader : MonoBehaviour
       return;
     }
 
-    var chunkDistance = Vector2.Distance(position, currentChunk.position);
-    if (chunkDistance > distance) UnloadChunk(ref currentChunk);
+    //var chunkDistance = Vector2.Distance(position, currentChunk.position);
+    //Debug.Log("");
+    //if (chunkDistance > distance) UnloadChunk(currentChunk);
     chunkPos = closestPos;
     currentChunk = scenes[closestX][closestY];
   }
 
-  private void HandleChunk(Vector2 position, ref ChunkData chunkData, Vector2 chunkPos, bool checkX, bool checkZ)
+  private void HandleChunk(Vector2 position, ChunkData chunkData, Vector2 chunkPos, bool checkX, bool checkZ)
   {
     if (chunkData.isValid)
     {
@@ -210,7 +222,7 @@ public class ChunkLoader : MonoBehaviour
           y = chunkData.y,
           distance = nextDistance
         });
-        LoadChunk(ref chunkData);
+        LoadChunk(chunkData);
         var distanceToCenter = Vector2.Distance(position, chunkData.position);
         if (distanceToCenter < closestDistance)
         {
@@ -241,7 +253,7 @@ public class ChunkLoader : MonoBehaviour
           size = new Vector3(chunkData.size.x, 0.01f, chunkData.size.z),
           color = Color.red
         });
-        UnloadChunk(ref chunkData);
+        UnloadChunk(chunkData);
       }
     }
   }
@@ -255,7 +267,7 @@ public class ChunkLoader : MonoBehaviour
     {
       foreach (var y in x)
       {
-        if (!y.isValid) continue;
+        if (y == null) continue;
         var nextXDistance = Vector2.Distance(position, y.position);
         if (nextXDistance < closestDistance)
         {
@@ -268,19 +280,19 @@ public class ChunkLoader : MonoBehaviour
     }
 
     Debug.Log($"Loading closest chunk: {closestX}, {closestY} - {closestDistance}");
-    LoadChunk(ref scenes[closestX][closestY]);
+    LoadChunk(scenes[closestX][closestY]);
     chunkPos = closestPos;
     currentChunk = scenes[closestX][closestY];
   }
 
-  private void LoadChunk(ref ChunkData chunkData)
+  private void LoadChunk(ChunkData chunkData)
   {
     if (chunkData.isLoaded) return;
     SceneManager.LoadSceneAsync(chunkData.chunkSceneIndex, LoadSceneMode.Additive);
     chunkData.isLoaded = true;
   }
 
-  private void UnloadChunk(ref ChunkData chunkData)
+  private void UnloadChunk(ChunkData chunkData)
   {
     //Debug.Log("Unloading!");
     if (!chunkData.isLoaded) return;
@@ -294,12 +306,12 @@ public class ChunkLoader : MonoBehaviour
   private void OnDrawGizmos()
   {
     Gizmos.color = Color.yellow;
-    //Gizmos.DrawWireSphere(transform.position, distance);
+    Gizmos.DrawWireSphere(transform.position, distance);
     foreach (var x in scenes)
     {
       foreach (var y in x)
       {
-        if (!y.isValid) continue;
+        if (y == null) continue;
         //if (!y.isLoaded)
         {
           Gizmos.color = Color.white;
@@ -351,9 +363,13 @@ public class ChunkLoader : MonoBehaviour
     }
   }
 
+  private Transform _transform;
+  private const string ProfilerName = "ChunkLoader.FixedUpdate";
   public void FixedUpdate()
   {
-    var position = transform.position;
+    Profiler.BeginSample(ProfilerName);
+    var position = _transform.position;
     LoadChunks(new Vector2(position.x, position.z));
+    Profiler.EndSample();
   }
 }
